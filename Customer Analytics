@@ -1,0 +1,68 @@
+#Customer Analytics
+#I'm querying a database with multiple tables to quantify statistics about customer and order. 
+
+#1 Orders placed in January,
+#2 Orders from iPhone, 
+#3 Customer account numbers for orders placed in January,
+# Cheapest phone purchased in January and price the customer paid,
+#5 Total revenue for each product sold in January,
+#6 Products sold at 548 Lincoln St, how many sold, and total revenue, 
+#7 Customers who ordered more than 1 product per day and avg amount spent.
+
+
+SELECT COUNT(orderid)
+FROM BIT_DB.JanSales
+WHERE length(orderid) = 6
+AND orderid <> 'Order ID'
+
+SELECT COUNT(orderid)
+FROM BIT_DB.JanSales
+WHERE Product='iphone'
+AND length(orderid) = 6
+AND orderid <> 'Order ID';
+
+SELECT distinct acctnum
+FROM BIT_DB.customers cust
+
+INNER JOIN BIT_DB.FebSales Feb
+ON cust.order_id=feb.orderid
+WHERE length(orderid) = 6
+AND orderid <> 'Order ID';
+
+SELECT Distinct Product, price
+FROM BIT_DB.JanSales
+WHERE price IN(SELECT min(price) FROM BIT_DB.JanSales);
+
+SELECT Distinct product,price
+FROM BIT_DB.JanSales
+ORDER BY price ASC LIMIT 1;
+
+SELECT distinct product, MIN(Price)
+FROM BIT_DB.JanSales Jan
+GROUP BY product,price
+ORDER BY price ASC LIMIT 1;
+
+SELECT product, min(price)
+FROM BIT_DB.JanSales Jan
+GROUP BY product, price
+ORDER BY price ASC
+LIMIT 1;
+
+SELECT sum(quantity)*price AS revenue,product
+FROM BIT_DB.JanSales
+GROUP BY product;
+
+SELECT sum(quantity),product,
+sum(quantity)*price AS revenue
+FROM BIT_DB.FebSales
+WHERE location = '548 Lincoln St, Seattle, WA 98101'
+GROUP BY product;
+
+SELECT COUNT(distinct cust.acctnum),
+avg(quantity*price)
+FROM BIT_DB.FebSales Feb
+LEFT JOIN BIT_DB.customers cust
+ON FEB.orderid=cust.order_id
+WHERE Feb.quantity>2
+AND length(orderid) = 6
+AND orderid  <> 'Order ID';
